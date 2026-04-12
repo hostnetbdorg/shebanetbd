@@ -633,6 +633,7 @@
         .toast.success { border-left: 5px solid var(--success); }
         .toast.error { border-left: 5px solid var(--danger); }
         .toast.info { border-left: 5px solid var(--primary); }
+        .toast.warning { border-left: 5px solid var(--warning); }
 
         /* ===== WHATSAPP FLOAT ===== */
         .wa-float {
@@ -671,6 +672,17 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { margin-top: 16px; font-size: 16px; font-weight: 700; color: var(--primary); }
+
+        /* ===== HELP TEXT FOR SETTINGS ===== */
+        .help-text {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .help-text i { color: var(--primary); }
 
         /* ===== DESKTOP ADJUSTMENTS ===== */
         @media (min-width: 768px) {
@@ -949,25 +961,55 @@
             <div class="admin-section" id="pricingContainer"></div>
         </div>
 
-        <!-- Settings - UPDATED WITH WHATSAPP OPTIONS -->
+        <!-- Settings - UPDATED WITH SMART WHATSAPP LINK SUPPORT -->
         <div class="page" id="admSettings">
             <div class="admin-section">
                 <div class="admin-card">
                     <div class="admin-card-head"><i class="fas fa-sliders-h"></i> সেটিংস</div>
                     <div class="settings-form">
-                        <div class="input-field"><label>নোটিশ টেক্সট</label><input type="text" id="setNotice" placeholder="নোটিশ লিখুন..."></div>
+                        <div class="input-field">
+                            <label>নোটিশ টেক্সট</label>
+                            <input type="text" id="setNotice" placeholder="নোটিশ লিখুন...">
+                        </div>
                         
-                        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 16px;"><i class="fab fa-whatsapp"></i> WhatsApp Settings</h3>
+                        <h3 style="margin: 20px 0 15px; color: #25d366; font-size: 16px;">
+                            <i class="fab fa-whatsapp"></i> WhatsApp Settings
+                        </h3>
                         
-                        <div class="input-field"><label>WhatsApp Support Number</label><input type="text" id="setWaSupport" placeholder="01XXXXXXXXX"></div>
-                        <div class="input-field"><label>WhatsApp Group Link</label><input type="text" id="setWaGroup" placeholder="https://chat.whatsapp.com/XXXXX"></div>
+                        <div class="input-field">
+                            <label><i class="fab fa-whatsapp"></i> WhatsApp Support Link / Number</label>
+                            <input type="text" id="setWaSupport" placeholder="https://wa.me/8801XXXXXXXXX অথবা 01XXXXXXXXX">
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                Direct Link (https://wa.me/...) অথবা শুধু নম্বর দিন - উভয়ই কাজ করবে!
+                            </div>
+                        </div>
                         
-                        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 16px;"><i class="fas fa-money-bill-wave"></i> Payment Settings</h3>
+                        <div class="input-field">
+                            <label>WhatsApp Group Link</label>
+                            <input type="text" id="setWaGroup" placeholder="https://chat.whatsapp.com/XXXXX">
+                            <div class="help-text">
+                                <i class="fas fa-link"></i>
+                                Group invitation link দিন
+                            </div>
+                        </div>
                         
-                        <div class="input-field"><label>bKash Number</label><input type="text" id="setBkash" placeholder="01XXXXXXXXX"></div>
-                        <div class="input-field"><label>Nagad Number</label><input type="text" id="setNagad" placeholder="01XXXXXXXXX"></div>
+                        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 16px;">
+                            <i class="fas fa-money-bill-wave"></i> Payment Settings
+                        </h3>
                         
-                        <button class="save-settings-btn" onclick="saveSettings()"><i class="fas fa-save"></i> Save Settings</button>
+                        <div class="input-field">
+                            <label>bKash Number</label>
+                            <input type="text" id="setBkash" placeholder="01XXXXXXXXX">
+                        </div>
+                        <div class="input-field">
+                            <label>Nagad Number</label>
+                            <input type="text" id="setNagad" placeholder="01XXXXXXXXX">
+                        </div>
+                        
+                        <button class="save-settings-btn" onclick="saveSettings()">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1031,7 +1073,7 @@
     </div>
 </div>
 
-<!-- WHATSAPP FLOAT BUTTON - DYNAMIC NUMBER -->
+<!-- WHATSAPP FLOAT BUTTON - DYNAMIC LINK -->
 <a href="#" id="waFloatBtn" target="_blank" class="wa-float"><i class="fab fa-whatsapp"></i></a>
 
 <!-- TOAST -->
@@ -1084,7 +1126,7 @@ const catInfo = {
     passport:{icon:'fa-passport',name:'পাসপোর্ট সার্ভিস'},
     sim:{icon:'fa-sim-card',name:'সিম সার্ভিস'},
     tin:{icon:'fa-file-invoice-dollar',name:'e-TIN সার্ভিস'},
-    other:{icon:'fa-star',name:'অন্যান্য সার্ভিস'}
+    other:{icon:'fa-star',name:'অন্যান্য'}
 };
 
 // ==========================================
@@ -1132,7 +1174,7 @@ const defaultServices = [
     {id:'tn3',name:'e-Return',cat:'tin',icon:'fa-file-alt',price:0,waOnly:true}
 ];
 
-// DEFAULT SETTINGS - WITH WHATSAPP FIELDS
+// DEFAULT SETTINGS - WITH SMART WHATSAPP FIELDS
 const defaultSettings = {
     notice: '📢 স্বাগতম Sheba Net BD - সকল সেবা এখন আপনার হাতের মুঠোয়!',
     bkash: '01611331466',
@@ -1224,34 +1266,189 @@ function hideLoading() {
 }
 
 // ==========================================
-// WHATSAPP FUNCTIONS - NEW!
+// 🔥 SMART WHATSAPP LINK SYSTEM - NEW!
 // ==========================================
 
-function updateWhatsAppElements() {
-    // Update WhatsApp Float Button
-    const waBtn = document.getElementById('waFloatBtn');
-    if (waBtn && settings.waSupport) {
-        waBtn.href = `https://wa.me/88${settings.waSupport.replace(/^0/, '')}`;
+/**
+ * Generates a proper WhatsApp URL from various input formats
+ * Supports:
+ * - Direct URLs: https://wa.me/8801XXXXXXXXX?text=Hello
+ * - Phone numbers: 01611331466 or 8801611331466
+ * - Auto-detects and converts appropriately
+ * 
+ * @param {string} serviceName - Optional service name for custom message
+ * @returns {string} Complete WhatsApp URL
+ */
+function generateWaLink(serviceName = '') {
+    const input = settings.waSupport || '01611331466';
+    let baseUrl = input.trim();
+    
+    console.log('🔄 Generating WA Link for:', input, 'Service:', serviceName || 'None');
+    
+    // Case 1: Already a complete URL
+    if (baseUrl.startsWith('http://') || baseUrl.startsWith('https://')) {
+        // If it already has custom text parameter, keep it as is
+        if (baseUrl.includes('?text=')) {
+            console.log('✅ Using existing WA URL with message:', baseUrl);
+            return baseUrl;
+        } 
+        // If service name provided, append custom message
+        else if (serviceName) {
+            let newUrl = baseUrl + '?text=' + encodeURIComponent('আমি ' + serviceName + ' সার্ভিস নিতে চাই');
+            console.log('✅ Added custom message to URL:', newUrl);
+            return newUrl;
+        } 
+        // Otherwise return as is
+        else {
+            console.log('✅ Using existing WA URL:', baseUrl);
+            return baseUrl;
+        }
     }
     
-    // Update Notice Bar WhatsApp Number
+    // Case 2: It's a phone number - convert to standard format
+    let cleanNumber = baseUrl.replace(/[^0-9]/g, ''); // Remove non-digit characters
+    
+    if (cleanNumber) {
+        // Ensure it starts with country code (88 for Bangladesh)
+        if (!cleanNumber.startsWith('88')) {
+            cleanNumber = '88' + cleanNumber;
+        }
+        
+        let finalUrl;
+        if (serviceName) {
+            finalUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent('আমি ' + serviceName + ' সার্ভিস নিতে চাই')}`;
+        } else {
+            finalUrl = `https://wa.me/${cleanNumber}`;
+        }
+        
+        console.log('✅ Converted number to URL:', finalUrl);
+        return finalUrl;
+    }
+    
+    // Fallback
+    console.warn('⚠️ Could not generate WA link, using default');
+    return 'https://wa.me/8801611331466';
+}
+
+/**
+ * Updates all WhatsApp elements on the page with smart detection
+ * Handles both direct links and phone numbers automatically
+ */
+function updateWhatsAppElements() {
+    console.log('🔄 Updating WhatsApp elements...');
+    console.log('   Current waSupport setting:', settings.waSupport);
+    
+    const waBtn = document.getElementById('waFloatBtn');
+    if (waBtn && settings.waSupport) {
+        const input = settings.waSupport.trim();
+        
+        if (input.startsWith('http://') || input.startsWith('https://')) {
+            // Direct URL - use as is
+            waBtn.href = input;
+            console.log('   ✅ Float Button: Direct URL set ->', input);
+        } else if (input.match(/^01\d{9}$/) || input.match(/^8801\d{9}$/)) {
+            // Bangladeshi number format - auto convert
+            let cleanNumber = input.replace(/^0/, '');
+            if (!cleanNumber.startsWith('88')) {
+                cleanNumber = '88' + cleanNumber;
+            }
+            waBtn.href = `https://wa.me/${cleanNumber}`;
+            console.log('   ✅ Float Button: Number converted ->', waBtn.href);
+        } else {
+            // Try to extract any numbers
+            let cleanNumber = input.replace(/[^0-9]/g, '');
+            if (cleanNumber) {
+                if (!cleanNumber.startsWith('88')) {
+                    cleanNumber = '88' + cleanNumber;
+                }
+                waBtn.href = `https://wa.me/${cleanNumber}`;
+                console.log('   ✅ Float Button: Extracted number ->', waBtn.href);
+            } else {
+                waBtn.href = '#';
+                console.warn('   ⚠️ Float Button: No valid number found');
+            }
+        }
+    }
+    
+    // Update Notice Bar - show only the number (not full URL)
     const waNoticeNum = document.getElementById('waNoticeNum');
     if (waNoticeNum && settings.waSupport) {
-        waNoticeNum.textContent = settings.waSupport;
+        let displayText = settings.waSupport.trim();
+        
+        // Extract just the number for display
+        if (displayText.startsWith('http')) {
+            // Try to extract number from URL like https://wa.me/8801XXXXXXXXX
+            let match = displayText.match(/wa\.me\/(\d+)/);
+            if (match && match[1]) {
+                let num = match[1];
+                // Convert back to local format for display
+                if (num.startsWith('880')) {
+                    num = '0' + num.substring(3);
+                }
+                displayText = num;
+            } else {
+                displayText = '💬 WhatsApp Support';
+            }
+        }
+        
+        waNoticeNum.textContent = displayText;
+        console.log('   ✅ Notice Bar Display:', displayText);
+    }
+    
+    console.log('   ✅ WhatsApp elements updated successfully!');
+}
+
+/**
+ * Opens WhatsApp support with smart link detection
+ */
+function openWaSupport() {
+    const input = settings.waSupport || '01611331466';
+    let waUrl = input.trim();
+    
+    console.log('📱 Opening WhatsApp support...');
+    console.log('   Input:', input);
+    
+    // SMART DETECTION
+    if (waUrl.startsWith('http://') || waUrl.startsWith('https://')) {
+        // Direct URL - use it directly
+        console.log('   ✅ Opening direct link:', waUrl);
+        window.open(waUrl, '_blank');
+    } else if (waUrl.match(/^01\d{9}$/) || waUrl.match(/^8801\d{9}$/)) {
+        // Number format - convert to link
+        let cleanNumber = waUrl.replace(/^0/, '');
+        if (!cleanNumber.startsWith('88')) {
+            cleanNumber = '88' + cleanNumber;
+        }
+        let link = `https://wa.me/${cleanNumber}`;
+        console.log('   ✅ Converted to link:', link);
+        window.open(link, '_blank');
+    } else {
+        // Fallback - try to extract numbers
+        let cleanNumber = waUrl.replace(/[^0-9]/g, '');
+        if (cleanNumber) {
+            if (!cleanNumber.startsWith('88')) {
+                cleanNumber = '88' + cleanNumber;
+            }
+            window.open(`https://wa.me/${cleanNumber}`, '_blank');
+            console.log('   ✅ Opened with extracted number');
+        } else {
+            toast('❌ WhatsApp Number সেট করা নেই!', 'error');
+            console.error('   ❌ No valid WhatsApp number/link found');
+        }
     }
 }
 
-function openWaSupport() {
-    const number = settings.waSupport || '01611331466';
-    window.open(`https://wa.me/88${number.replace(/^0/, '')}`, '_blank');
-}
-
+/**
+ * Opens WhatsApp group link
+ */
 function openWaGroup() {
     const link = settings.waGroup || 'https://chat.whatsapp.com/';
-    if (link && link !== 'https://chat.whatsapp.com/') {
+    if (link && link !== 'https://chat.whatsapp.com/' && link.trim() !== '') {
+        console.log('📱 Opening WhatsApp Group:', link);
         window.open(link, '_blank');
     } else {
-        toast('WhatsApp Group Link Set করা হয়নি!', 'info');
+        toast('⚠️ WhatsApp Group Link Set করা হয়নি!', 'info');
+        console.warn('⚠️ No group link set');
     }
 }
 
@@ -1320,13 +1517,41 @@ function updateSettingsUI() {
     }
 }
 
+/**
+ * Save Settings with Smart Validation for WhatsApp
+ */
 async function saveSettings() {
     const noticeVal = document.getElementById('setNotice')?.value || '';
     const bkashVal = document.getElementById('setBkash')?.value || '';
     const nagadVal = document.getElementById('setNagad')?.value || '';
-    const waSupportVal = document.getElementById('setWaSupport')?.value || '';
-    const waGroupVal = document.getElementById('setWaGroup')?.value || '';
+    const waSupportVal = document.getElementById('setWaSupport')?.value?.trim() || '';
+    const waGroupVal = document.getElementById('setWaGroup')?.value?.trim() || '';
     
+    console.log('💾 Saving settings...');
+    console.log('   WhatsApp Input:', waSupportVal);
+    
+    // SMART VALIDATION for WhatsApp Support
+    if (waSupportVal) {
+        if (waSupportVal.startsWith('http://') || waSupportVal.startsWith('https://')) {
+            // It's a URL - validate basic format
+            if (!waSupportVal.includes('wa.me/') && !waSupportVal.includes('whatsapp.com/') && !waSupportVal.includes('api.whatsapp.com/')) {
+                toast('⚠️ Warning: WhatsApp URL format unusual! তবুও সেভ হচ্ছে...', 'warning');
+                console.warn('⚠️ Unusual WhatsApp URL format:', waSupportVal);
+            } else {
+                console.log('✅ Valid WhatsApp URL detected');
+            }
+        } else if (!waSupportVal.match(/^01\d{9}$/) && !waSupportVal.match(/^8801\d{9}$/)) {
+            // Not a standard Bangladeshi number
+            toast('⚠️ Warning: Number format unusual! তবুও সেভ হচ্ছে...', 'warning');
+            console.warn('⚠️ Unusual phone number format:', waSupportVal);
+        } else {
+            console.log('✅ Valid Bangladesh number format');
+        }
+    } else {
+        toast('⚠️ WhatsApp Support খালি!', 'warning');
+    }
+    
+    // Update settings object
     settings.notice = noticeVal;
     settings.bkash = bkashVal;
     settings.nagad = nagadVal;
@@ -1335,15 +1560,36 @@ async function saveSettings() {
     
     try {
         await database.ref('settings').set(settings);
-        toast('Settings Saved Successfully!', 'success');
-        console.log('💾 Settings saved to Firebase');
+        
+        // Success message with details
+        let successMsg = '✅ Settings Saved Successfully!';
+        if (waSupportVal) {
+            if (waSupportVal.startsWith('http')) {
+                successMsg += ' (🔗 WhatsApp Link Active)';
+            } else {
+                successMsg += ' (📱 WhatsApp: ' + waSupportVal + ')';
+            }
+        }
+        
+        toast(successMsg, 'success');
+        console.log('💾 Settings saved to Firebase:', settings);
+        console.log('📱 WhatsApp Support configured as:', waSupportVal);
         
         // Update WhatsApp UI elements immediately
         updateWhatsAppElements();
         
+        // Show detailed preview in console
+        console.log('');
+        console.log('🔍 WhatsApp Configuration Preview:');
+        console.log('   ┌─────────────────────────────────────┐');
+        console.log('   │ Float Button URL:', document.getElementById('waFloatBtn')?.href || 'Not set');
+        console.log('   │ Notice Display:', document.getElementById('waNoticeNum')?.textContent || 'Not set');
+        console.log('   └─────────────────────────────────────┘');
+        console.log('');
+        
     } catch (error) {
-        console.error('Save settings error:', error);
-        toast('Error saving settings!', 'error');
+        console.error('❌ Save settings error:', error);
+        toast('❌ Error saving settings! ' + error.message, 'error');
     }
 }
 
@@ -1951,7 +2197,7 @@ async function loadAllOrders() {
 }
 
 // ==========================================
-// SERVICE PAGE
+// SERVICE PAGE - WITH SMART WHATSAPP LINKS
 // ==========================================
 function openService(sid) {
     const svc = services.find(s => s.id === sid);
@@ -1971,6 +2217,7 @@ function openService(sid) {
     const finalPrice = svc.price;
     
     if (svc.waOnly) {
+        // Use generateWaLink() for smart link generation
         html = `
             <div class="page service-page active" id="svcPg${sid}" style="display:block;">
                 <div class="form-card">
@@ -1980,7 +2227,7 @@ function openService(sid) {
                             <h3>${svc.name}</h3>
                             <p>এই সার্ভিসের জন্য WhatsApp এ যোগাযোগ করুন</p>
                         </div>
-                        <a href="https://wa.me/88${(settings.waSupport || '01611331466').replace(/^0/, '')}?text=${encodeURIComponent('আমি ' + svc.name + ' সার্ভিস নিতে চাই')}" target="_blank" class="wa-contact-btn">
+                        <a href="${generateWaLink(svc.name)}" target="_blank" class="wa-contact-btn">
                             <i class="fab fa-whatsapp"></i> WhatsApp এ যোগাযোগ করুন
                         </a>
                     </div>
@@ -2837,7 +3084,8 @@ function toast(msg, type = 'info') {
         iconEl.className = 'fas ' + ({
             success: 'fa-check-circle',
             error: 'fa-times-circle',
-            info: 'fa-info-circle'
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
         }[type] || 'fa-info-circle');
     }
     
@@ -2848,12 +3096,19 @@ function toast(msg, type = 'info') {
     }, 2800);
 }
 
-console.log('%c🚀 Sheba Net BD - Version 2.0 With WhatsApp Features!', 'color: #00897b; font-size: 16px; font-weight: bold;');
+console.log('%c🚀 Sheba Net BD - Version 2.1 With Smart WhatsApp Links!', 'color: #00897b; font-size: 16px; font-weight: bold;');
 console.log('%c✅ New Features:', 'color: #25d366; font-size: 14px;');
-console.log('   • WhatsApp Support Number (Editable)');
-console.log('   • WhatsApp Group Link (Editable)');
-console.log('   • Dynamic WhatsApp Float Button');
-console.log('   • WA Integration in User Dashboard');
+console.log('   • 🔗 Smart WhatsApp Link Detection (URL + Number)');
+console.log('   • 📱 Direct Link Support (https://wa.me/...)');
+console.log('   • 📞 Auto Number Conversion (01XXX → 8801XXX)');
+console.log('   • 💬 Custom Message Support');
+console.log('   • ⚠️ Input Validation with Warnings');
+console.log('');
+console.log('%c📝 How to use:', 'color: #0984e3; font-size: 13px; font-weight: bold;');
+console.log('   In Admin Settings → WhatsApp Support:');
+console.log('   Option 1: https://wa.me/8801611331466?text=Hi');
+console.log('   Option 2: 01611331466');
+console.log('   Both work perfectly! ✨');
 </script>
 </body>
 </html>
