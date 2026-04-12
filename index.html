@@ -700,7 +700,7 @@
 <!-- NOTICE BAR -->
 <div class="notice-bar">
     <marquee id="noticeText" scrollamount="5" behavior="scroll" direction="left">
-        <i class="fas fa-bullhorn"></i> 📢 স্বাগতম Sheba Net BD - সকল সেবা এখন আপনার হাতের মুঠোয়! WhatsApp: 01611331466
+        <i class="fas fa-bullhorn"></i> 📢 স্বাগতম Sheba Net BD - সকল সেবা এখন আপনার হাতের মুঠোয়! WhatsApp: <span id="waNoticeNum">01611331466</span>
     </marquee>
 </div>
 
@@ -798,11 +798,11 @@
                         <div class="quick-icon green"><i class="fas fa-plus-circle"></i></div>
                         <h4>টাকা যোগ</h4>
                     </div>
-                    <div class="quick-card" onclick="window.open('https://wa.me/8801611331466','_blank')">
+                    <div class="quick-card" onclick="openWaSupport()">
                         <div class="quick-icon blue"><i class="fab fa-whatsapp"></i></div>
                         <h4>WhatsApp</h4>
                     </div>
-                    <div class="quick-card" onclick="window.open('https://chat.whatsapp.com/','_blank')">
+                    <div class="quick-card" onclick="openWaGroup()">
                         <div class="quick-icon orange"><i class="fab fa-whatsapp"></i></div>
                         <h4>WA Group</h4>
                     </div>
@@ -949,15 +949,24 @@
             <div class="admin-section" id="pricingContainer"></div>
         </div>
 
-        <!-- Settings -->
+        <!-- Settings - UPDATED WITH WHATSAPP OPTIONS -->
         <div class="page" id="admSettings">
             <div class="admin-section">
                 <div class="admin-card">
                     <div class="admin-card-head"><i class="fas fa-sliders-h"></i> সেটিংস</div>
                     <div class="settings-form">
                         <div class="input-field"><label>নোটিশ টেক্সট</label><input type="text" id="setNotice" placeholder="নোটিশ লিখুন..."></div>
+                        
+                        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 16px;"><i class="fab fa-whatsapp"></i> WhatsApp Settings</h3>
+                        
+                        <div class="input-field"><label>WhatsApp Support Number</label><input type="text" id="setWaSupport" placeholder="01XXXXXXXXX"></div>
+                        <div class="input-field"><label>WhatsApp Group Link</label><input type="text" id="setWaGroup" placeholder="https://chat.whatsapp.com/XXXXX"></div>
+                        
+                        <h3 style="margin: 20px 0 15px; color: var(--primary); font-size: 16px;"><i class="fas fa-money-bill-wave"></i> Payment Settings</h3>
+                        
                         <div class="input-field"><label>bKash Number</label><input type="text" id="setBkash" placeholder="01XXXXXXXXX"></div>
                         <div class="input-field"><label>Nagad Number</label><input type="text" id="setNagad" placeholder="01XXXXXXXXX"></div>
+                        
                         <button class="save-settings-btn" onclick="saveSettings()"><i class="fas fa-save"></i> Save Settings</button>
                     </div>
                 </div>
@@ -1022,15 +1031,15 @@
     </div>
 </div>
 
-<!-- WHATSAPP FLOAT -->
-<a href="https://wa.me/8801611331466" target="_blank" class="wa-float"><i class="fab fa-whatsapp"></i></a>
+<!-- WHATSAPP FLOAT BUTTON - DYNAMIC NUMBER -->
+<a href="#" id="waFloatBtn" target="_blank" class="wa-float"><i class="fab fa-whatsapp"></i></a>
 
 <!-- TOAST -->
 <div class="toast" id="toastEl"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
 
 <script>
 // ==========================================
-// ✅ FIREBASE CONFIGURATION (CORRECT)
+// ✅ FIREBASE CONFIGURATION
 // ==========================================
 
 const firebaseConfig = {
@@ -1043,7 +1052,6 @@ const firebaseConfig = {
   appId: "1:1000888876793:web:39519813ef44e7099a6c28"
 };
 
-// Initialize Firebase
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -1063,7 +1071,6 @@ let orders = [];
 let moneyReqs = [];
 let currentUser = null;
 
-// Listener references (for cleanup)
 let usersListener = null;
 let ordersListener = null;
 let moneyListener = null;
@@ -1125,14 +1132,17 @@ const defaultServices = [
     {id:'tn3',name:'e-Return',cat:'tin',icon:'fa-file-alt',price:0,waOnly:true}
 ];
 
+// DEFAULT SETTINGS - WITH WHATSAPP FIELDS
 const defaultSettings = {
-    notice: '📢 স্বাগতম Sheba Net BD - সকল সেবা এখন আপনার হাতের মুঠোয়! WhatsApp: 01611331466',
+    notice: '📢 স্বাগতম Sheba Net BD - সকল সেবা এখন আপনার হাতের মুঠোয়!',
     bkash: '01611331466',
-    nagad: '01611331466'
+    nagad: '01611331466',
+    waSupport: '01611331466',
+    waGroup: 'https://chat.whatsapp.com/'
 };
 
 // ==========================================
-// INITIALIZATION ✅ FIXED
+// INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 DOM Loaded, initializing app...');
@@ -1144,7 +1154,6 @@ async function initApp() {
     console.log('⏳ Starting initialization...');
     
     try {
-        // Step 1: Check saved user session
         const savedUser = localStorage.getItem('snb_curuser');
         
         if (savedUser) {
@@ -1152,7 +1161,6 @@ async function initApp() {
                 currentUser = JSON.parse(savedUser);
                 console.log('👤 Found saved user:', currentUser.phone);
                 
-                // Verify user exists in Firebase
                 const userSnapshot = await database.ref(`users/${currentUser.id}`).once('value');
                 
                 if (userSnapshot.exists()) {
@@ -1181,13 +1189,14 @@ async function initApp() {
             document.getElementById('authModal').classList.add('show');
         }
         
-        // Step 2: Load settings (independent operation)
         console.log('⚙️ Loading settings...');
         await loadSettings();
         
-        // Step 3: Load services (independent operation)
         console.log('🔧 Loading services...');
         await loadServices();
+        
+        // Update WhatsApp elements after loading
+        updateWhatsAppElements();
         
         console.log('✅ Initialization completed successfully!');
         hideLoading();
@@ -1197,7 +1206,6 @@ async function initApp() {
         hideLoading();
         toast('Error loading app! Please refresh page.', 'error');
         
-        // Fallback: Show auth modal after delay
         setTimeout(() => {
             document.getElementById('authModal').classList.add('show');
         }, 1000);
@@ -1216,11 +1224,42 @@ function hideLoading() {
 }
 
 // ==========================================
-// SETTINGS MANAGEMENT ✅ OPTIMIZED
+// WHATSAPP FUNCTIONS - NEW!
+// ==========================================
+
+function updateWhatsAppElements() {
+    // Update WhatsApp Float Button
+    const waBtn = document.getElementById('waFloatBtn');
+    if (waBtn && settings.waSupport) {
+        waBtn.href = `https://wa.me/88${settings.waSupport.replace(/^0/, '')}`;
+    }
+    
+    // Update Notice Bar WhatsApp Number
+    const waNoticeNum = document.getElementById('waNoticeNum');
+    if (waNoticeNum && settings.waSupport) {
+        waNoticeNum.textContent = settings.waSupport;
+    }
+}
+
+function openWaSupport() {
+    const number = settings.waSupport || '01611331466';
+    window.open(`https://wa.me/88${number.replace(/^0/, '')}`, '_blank');
+}
+
+function openWaGroup() {
+    const link = settings.waGroup || 'https://chat.whatsapp.com/';
+    if (link && link !== 'https://chat.whatsapp.com/') {
+        window.open(link, '_blank');
+    } else {
+        toast('WhatsApp Group Link Set করা হয়নি!', 'info');
+    }
+}
+
+// ==========================================
+// SETTINGS MANAGEMENT
 // ==========================================
 async function loadSettings() {
     return new Promise((resolve) => {
-        // Remove old listener if exists
         if (settingsListener) {
             database.ref('settings').off('value', settingsListener);
         }
@@ -1230,25 +1269,32 @@ async function loadSettings() {
                 if (snapshot.exists()) {
                     settings = snapshot.val();
                     console.log('⚙️ Settings loaded from Firebase');
+                    
+                    // Ensure WhatsApp fields exist with defaults
+                    if (!settings.waSupport) settings.waSupport = defaultSettings.waSupport;
+                    if (!settings.waGroup) settings.waGroup = defaultSettings.waGroup;
                 } else {
                     settings = { ...defaultSettings };
                     console.log('⚙️ Using default settings');
                     
-                    // Save defaults to Firebase
                     database.ref('settings').set(settings).catch(err => {
                         console.error('Error saving default settings:', err);
                     });
                 }
                 
-                // Update UI
                 updateSettingsUI();
                 
-                // Set up real-time listener for future updates
                 settingsListener = database.ref('settings').on('value', (snap) => {
                     if (snap.exists()) {
                         settings = snap.val();
+                        
+                        // Ensure WhatsApp fields exist
+                        if (!settings.waSupport) settings.waSupport = defaultSettings.waSupport;
+                        if (!settings.waGroup) settings.waGroup = defaultSettings.waGroup;
+                        
                         console.log('⚙️ Settings updated in real-time');
                         updateSettingsUI();
+                        updateWhatsAppElements();
                     }
                 });
                 
@@ -1278,15 +1324,23 @@ async function saveSettings() {
     const noticeVal = document.getElementById('setNotice')?.value || '';
     const bkashVal = document.getElementById('setBkash')?.value || '';
     const nagadVal = document.getElementById('setNagad')?.value || '';
+    const waSupportVal = document.getElementById('setWaSupport')?.value || '';
+    const waGroupVal = document.getElementById('setWaGroup')?.value || '';
     
     settings.notice = noticeVal;
     settings.bkash = bkashVal;
     settings.nagad = nagadVal;
+    settings.waSupport = waSupportVal;
+    settings.waGroup = waGroupVal;
     
     try {
         await database.ref('settings').set(settings);
         toast('Settings Saved Successfully!', 'success');
         console.log('💾 Settings saved to Firebase');
+        
+        // Update WhatsApp UI elements immediately
+        updateWhatsAppElements();
+        
     } catch (error) {
         console.error('Save settings error:', error);
         toast('Error saving settings!', 'error');
@@ -1294,7 +1348,7 @@ async function saveSettings() {
 }
 
 // ==========================================
-// SERVICES MANAGEMENT ✅ FULLY FIXED
+// SERVICES MANAGEMENT
 // ==========================================
 async function initializeDefaultServices() {
     console.log('🔧 Initializing default services...');
@@ -1325,12 +1379,10 @@ async function loadServices() {
             services = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             console.log(`✅ Loaded ${services.length} services from Firebase`);
             
-            // If no services exist, initialize defaults
             if (services.length === 0) {
                 console.log('⚠️ No services found, initializing defaults...');
                 await initializeDefaultServices();
                 
-                // Reload after initialization
                 const newSnapshot = await database.ref('services').once('value');
                 if (newSnapshot.exists()) {
                     const newData = newSnapshot.val();
@@ -1350,10 +1402,8 @@ async function loadServices() {
             }
         }
         
-        // Set up real-time listener for service updates
         setupServicesListener();
         
-        // Update UI if menu exists
         if (document.getElementById('userMenuBody')) {
             renderUserMenu();
         }
@@ -1367,19 +1417,16 @@ async function loadServices() {
 }
 
 function setupServicesListener() {
-    // Remove old listener if exists
     if (servicesListener) {
         database.ref('services').off('value', servicesListener);
     }
     
-    // Set up new listener
     servicesListener = database.ref('services').on('value', (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.val();
             services = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             console.log(`🔄 Services updated in real-time: ${services.length} services`);
             
-            // Update relevant UI components
             if (document.getElementById('mainHeader')?.style.display !== 'none') {
                 renderUserMenu();
             }
@@ -1396,7 +1443,7 @@ function setupServicesListener() {
 }
 
 // ==========================================
-// AUTHENTICATION ✅ IMPROVED ERROR HANDLING
+// AUTHENTICATION
 // ==========================================
 function switchAuthTab(tabType) {
     document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
@@ -1431,7 +1478,6 @@ async function doLogin() {
         if (ph === ADMIN.phone && pw === ADMIN.pass) {
             console.log('🔑 Admin login attempt');
             
-            // Check if admin exists in database
             let admRef = database.ref('users').orderByChild('phone').equalTo(ph);
             let snapshot = await admRef.once('value');
             
@@ -1441,7 +1487,6 @@ async function doLogin() {
             });
             
             if (!adm) {
-                // Create admin account
                 console.log('📝 Creating new admin account...');
                 const newAdmRef = database.ref('users').push();
                 adm = {
@@ -1523,7 +1568,6 @@ async function doRegister() {
     console.log('📝 Registration attempt for:', ph);
     
     try {
-        // Check if phone already exists
         let checkRef = database.ref('users').orderByChild('phone').equalTo(ph);
         let snapshot = await checkRef.once('value');
         
@@ -1532,7 +1576,6 @@ async function doRegister() {
             return toast('এই নম্বরে একাউন্ট আছে!', 'error');
         }
         
-        // Create new user
         const newUserRef = database.ref('users').push();
         const newUser = {
             name: nm,
@@ -1564,7 +1607,6 @@ async function doRegister() {
 function logout() {
     console.log('🚪 Logging out...');
     
-    // Clean up all listeners
     cleanupAllListeners();
     
     currentUser = null;
@@ -1573,9 +1615,6 @@ function logout() {
     location.reload();
 }
 
-// ==========================================
-// LISTENER CLEANUP ✅ NEW FUNCTION
-// ==========================================
 function cleanupAllListeners() {
     console.log('🧹 Cleaning up all listeners...');
     
@@ -1615,7 +1654,7 @@ function cleanupAllListeners() {
 }
 
 // ==========================================
-// VIEW SWITCHING ✅ CLEANED UP
+// VIEW SWITCHING
 // ==========================================
 function showUserView() {
     console.log('👁️ Showing user view');
@@ -1638,6 +1677,9 @@ function showUserView() {
     renderUserMenu();
     loadRecentOrders();
     listenToUserBalance();
+    
+    // Update WhatsApp elements for user view
+    updateWhatsAppElements();
 }
 
 function showAdminView() {
@@ -1660,12 +1702,10 @@ function listenToUserBalance() {
     
     console.log('💵 Setting up balance listener for user:', currentUser.id);
     
-    // Remove old listener
     if (balanceListener) {
         database.ref(`users/${currentUser.id}/balance`).off('value', balanceListener);
     }
     
-    // New listener
     balanceListener = database.ref(`users/${currentUser.id}/balance`).on('value', (snapshot) => {
         if (snapshot.exists()) {
             const newBalance = snapshot.val();
@@ -1685,7 +1725,6 @@ function listenToUserBalance() {
 function listenToAllData() {
     console.log('📊 Setting up admin data listeners...');
     
-    // Users listener
     if (usersListener) {
         database.ref('users').off('value', usersListener);
     }
@@ -1699,7 +1738,6 @@ function listenToAllData() {
         updateAdminStats();
     });
     
-    // Orders listener
     if (ordersListener) {
         database.ref('orders').off('value', ordersListener);
     }
@@ -1713,7 +1751,6 @@ function listenToAllData() {
         updateAdminStats();
     });
     
-    // Money requests listener
     if (moneyListener) {
         database.ref('moneyRequests').off('value', moneyListener);
     }
@@ -1729,7 +1766,7 @@ function listenToAllData() {
 }
 
 // ==========================================
-// USER MENU RENDERING ✅ NO CHANGES NEEDED
+// USER MENU RENDERING
 // ==========================================
 function renderUserMenu() {
     const body = document.getElementById('userMenuBody');
@@ -1760,7 +1797,7 @@ function renderUserMenu() {
 }
 
 // ==========================================
-// MENU CONTROLS ✅ WORKING PERFECTLY
+// MENU CONTROLS
 // ==========================================
 function toggleMenu() { 
     document.getElementById('menuOverlay')?.classList.add('active'); 
@@ -1780,7 +1817,7 @@ function closeAdminMenu() {
 }
 
 // ==========================================
-// USER PAGES ✅ NO ISSUES
+// USER PAGES
 // ==========================================
 function goToDashboard() {
     document.getElementById('servicePageContainer').innerHTML = '';
@@ -1914,7 +1951,7 @@ async function loadAllOrders() {
 }
 
 // ==========================================
-// SERVICE PAGE ✅ WORKING
+// SERVICE PAGE
 // ==========================================
 function openService(sid) {
     const svc = services.find(s => s.id === sid);
@@ -1925,7 +1962,6 @@ function openService(sid) {
     
     console.log('🔧 Opening service:', svc.name);
     
-    // Hide all main pages
     document.querySelectorAll('#userPanel > .page').forEach(el => {
         el.classList.remove('active');
         el.style.display = 'none';
@@ -1944,7 +1980,7 @@ function openService(sid) {
                             <h3>${svc.name}</h3>
                             <p>এই সার্ভিসের জন্য WhatsApp এ যোগাযোগ করুন</p>
                         </div>
-                        <a href="https://wa.me/8801611331466?text=${encodeURIComponent('আমি ' + svc.name + ' সার্ভিস নিতে চাই')}" target="_blank" class="wa-contact-btn">
+                        <a href="https://wa.me/88${(settings.waSupport || '01611331466').replace(/^0/, '')}?text=${encodeURIComponent('আমি ' + svc.name + ' সার্ভিস নিতে চাই')}" target="_blank" class="wa-contact-btn">
                             <i class="fab fa-whatsapp"></i> WhatsApp এ যোগাযোগ করুন
                         </a>
                     </div>
@@ -1952,7 +1988,6 @@ function openService(sid) {
             </div>
         `;
     } else {
-        // Build options HTML
         let optsHtml = '';
         if (svc.hasOpts) {
             optsHtml = '<div class="option-grid">' + 
@@ -1966,7 +2001,6 @@ function openService(sid) {
             '</div>';
         }
         
-        // Build operators HTML
         let opsHtml = '';
         if (svc.hasOps) {
             opsHtml = '<div class="operator-grid">' + 
@@ -1981,7 +2015,6 @@ function openService(sid) {
             '</div>';
         }
         
-        // Build dropdown HTML
         let ddHtml = '';
         if (svc.hasDD) {
             ddHtml = `
@@ -1994,7 +2027,6 @@ function openService(sid) {
             `;
         }
         
-        // Build fields HTML
         let fldsHtml = '';
         if (svc.fields && svc.fields.length > 0) {
             svc.fields.forEach(f => {
@@ -2106,11 +2138,8 @@ function updSvcPrice(p) {
         btn.disabled = !can;
         btn.innerHTML = `<i class="fas ${can ? 'fa-paper-plane' : 'fa-exclamation-triangle'}"></i> ${can ? 'অর্ডার করুন (৳' + p + ')' : 'পর্যাপ্ত ব্যালেন্স নেই'}`;
         
-        // Remove existing warning
         const existingWarning = btn.nextElementSibling;
-        if (existingWarning && existingWarning.tagName === 'P') {
-            existingWarning.remove();
-        }
+        if (existingWarning && existingWarning.tagName === 'P') existingWarning.remove();
         
         if (!can) { 
             const sp = document.createElement('p'); 
@@ -2122,7 +2151,7 @@ function updSvcPrice(p) {
 }
 
 // ==========================================
-// PLACE ORDER ✅ ENHANCED WITH BETTER ERROR HANDLING
+// PLACE ORDER
 // ==========================================
 async function placeOrder(sid) {
     const svc = services.find(s => s.id === sid);
@@ -2169,7 +2198,6 @@ async function placeOrder(sid) {
     console.log('📦 Placing order for service:', svc.name, '- Price:', price);
     
     try {
-        // Create order in Firebase
         const orderRef = database.ref('orders').push();
         const orderId = orderRef.key;
         
@@ -2188,12 +2216,10 @@ async function placeOrder(sid) {
         await orderRef.set(ord);
         console.log('✅ Order created with ID:', orderId);
         
-        // Deduct balance
         const newBalance = currentUser.balance - price;
         await database.ref(`users/${currentUser.id}/balance`).set(newBalance);
         console.log('💰 Balance deducted. New balance:', newBalance);
         
-        // Update local state
         currentUser.balance = newBalance;
         
         const dashBalEl = document.getElementById('dashBalance');
@@ -2201,11 +2227,9 @@ async function placeOrder(sid) {
         
         toast('✅ অর্ডার সফলভাবে জমা হয়েছে!', 'success');
         
-        // Reset selection variables
         selOptPrice = 0;
         selOpName = '';
         
-        // Go back to dashboard after short delay
         setTimeout(() => {
             goBackToDashboard();
         }, 1500);
@@ -2224,7 +2248,7 @@ function goBackToDashboard() {
 }
 
 // ==========================================
-// MONEY FUNCTIONS ✅ WORKING
+// MONEY FUNCTIONS
 // ==========================================
 window.curPayMethod = 'bkash';
 
@@ -2278,7 +2302,6 @@ async function submitAddMoney() {
         
         console.log('✅ Money request submitted');
         
-        // Clear form
         if (amtInput) amtInput.value = '';
         if (txnInput) txnInput.value = '';
         
@@ -2294,17 +2317,12 @@ async function submitAddMoney() {
 }
 
 // ==========================================
-// ADMIN FUNCTIONS ✅ COMPLETELY REWRITTEN - NO INFINITE LOOP
+// ADMIN FUNCTIONS
 // ==========================================
 
-/**
- * ✅ FIXED: This function now ONLY updates stats and renders tables ONCE
- * No more recursive calls or infinite loops!
- */
 function updateAdminStats() {
     console.log('📊 Updating admin stats...');
     
-    // Update statistics numbers
     const totalUsersEl = document.getElementById('aTotalUsers');
     const totalOrdersEl = document.getElementById('aTotalOrders');
     const pendingEl = document.getElementById('aPending');
@@ -2315,20 +2333,14 @@ function updateAdminStats() {
     if (pendingEl) pendingEl.textContent = moneyReqs.filter(r => r.status === 'pending').length;
     if (revenueEl) revenueEl.textContent = '৳' + orders.reduce((sum, o) => sum + (o.price || 0), 0);
     
-    // Render tables (call each ONLY ONCE)
     renderUsersTable();
     renderOrdersTable();
     renderMoneyTable();
-    
-    // Update settings fields if on settings page
     updateSettingsFields();
     
     console.log('✅ Admin stats updated successfully');
 }
 
-/**
- * ✅ NEW: Separate render functions to prevent recursion
- */
 function renderUsersTable() {
     const tbody = document.getElementById('usersTbody');
     if (!tbody) return;
@@ -2396,23 +2408,21 @@ function updateSettingsFields() {
     const noticeInput = document.getElementById('setNotice');
     const bkashInput = document.getElementById('setBkash');
     const nagadInput = document.getElementById('setNagad');
+    const waSupportInput = document.getElementById('setWaSupport');
+    const waGroupInput = document.getElementById('setWaGroup');
     
-    if (noticeInput && settings.notice !== undefined) noticeInput.value = settings.notice;
-    if (bkashInput && settings.bkash !== undefined) bkashInput.value = settings.bkash;
-    if (nagadInput && settings.nagad !== undefined) nagadInput.value = settings.nagad;
+    if (noticeInput) noticeInput.value = settings.notice || '';
+    if (bkashInput) bkashInput.value = settings.bkash || '';
+    if (nagadInput) nagadInput.value = settings.nagad || '';
+    if (waSupportInput) waSupportInput.value = settings.waSupport || '';
+    if (waGroupInput) waGroupInput.value = settings.waGroup || '';
 }
 
-/**
- * ✅ FIXED: Just calls updateAdminStats once, no recursion
- */
 function loadAdminData() {
     console.log('📊 Loading admin data...');
     updateAdminStats();
 }
 
-/**
- * ✅ FIXED: Just calls render functions once, no recursion
- */
 function loadAdminTables() {
     console.log('📋 Loading admin tables...');
     renderUsersTable();
@@ -2423,7 +2433,6 @@ function loadAdminTables() {
 function showAdminPage(page) {
     console.log('📄 Showing admin page:', page);
     
-    // Hide all admin pages
     document.querySelectorAll('#adminPanelDiv .page').forEach(p => {
         p.classList.remove('active');
     });
@@ -2443,7 +2452,6 @@ function showAdminPage(page) {
         targetPage.classList.add('active');
     }
     
-    // Load data based on page
     if (['dash', 'users', 'orders', 'money'].includes(page)) {
         loadAdminData();
     }
@@ -2462,7 +2470,7 @@ function showAdminPage(page) {
 }
 
 // ==========================================
-// MONEY REQUEST ACTIONS ✅ WORKING
+// MONEY REQUEST ACTIONS
 // ==========================================
 async function apprMR(id) {
     const req = moneyReqs.find(r => r.id === id);
@@ -2475,18 +2483,15 @@ async function apprMR(id) {
     console.log('✅ Approving money request:', id);
     
     try {
-        // Update request status
         await database.ref(`moneyRequests/${id}/status`).set('approved');
         console.log('✅ Request status updated to approved');
         
-        // Find user and add balance
         const user = users.find(u => u.id === req.uid);
         if (user) {
             const newBal = (user.balance || 0) + req.amount;
             await database.ref(`users/${req.uid}/balance`).set(newBal);
             console.log(`💰 Added ৳${req.amount} to user balance. New balance: ৳${newBal}`);
             
-            // Update local state if it's the current user
             if (currentUser && currentUser.id === req.uid) {
                 currentUser.balance = newBal;
                 const dashBalEl = document.getElementById('dashBalance');
@@ -2521,7 +2526,7 @@ async function rejMR(id) {
 }
 
 // ==========================================
-// SERVICE MANAGEMENT ✅ INLINE EDITING WORKING
+// SERVICE MANAGEMENT
 // ==========================================
 function loadSvcTable() {
     const tbody = document.getElementById('svcTbody');
@@ -2666,7 +2671,6 @@ async function addNewService() {
         
         console.log('✅ New service added successfully');
         
-        // Clear form
         if (nameInput) nameInput.value = '';
         if (priceInput) priceInput.value = '';
         
@@ -2701,7 +2705,7 @@ async function delService(id) {
 }
 
 // ==========================================
-// PRICING PAGE ✅ WORKING
+// PRICING PAGE
 // ==========================================
 function loadPricingPage() {
     const container = document.getElementById('pricingContainer');
@@ -2780,7 +2784,7 @@ async function updatePricing(id) {
 }
 
 // ==========================================
-// SETTINGS DATA ✅ WORKING
+// SETTINGS DATA
 // ==========================================
 function loadSettingsData() {
     console.log('⚙️ Loading settings data into form...');
@@ -2788,14 +2792,18 @@ function loadSettingsData() {
     const noticeInput = document.getElementById('setNotice');
     const bkashInput = document.getElementById('setBkash');
     const nagadInput = document.getElementById('setNagad');
+    const waSupportInput = document.getElementById('setWaSupport');
+    const waGroupInput = document.getElementById('setWaGroup');
     
     if (noticeInput) noticeInput.value = settings.notice || '';
     if (bkashInput) bkashInput.value = settings.bkash || '';
     if (nagadInput) nagadInput.value = settings.nagad || '';
+    if (waSupportInput) waSupportInput.value = settings.waSupport || '';
+    if (waGroupInput) waGroupInput.value = settings.waGroup || '';
 }
 
 // ==========================================
-// UTILITIES ✅ LEGACY FUNCTIONS (kept for compatibility)
+// UTILITIES
 // ==========================================
 function saveU(){localStorage.setItem('snb_users',JSON.stringify(users));}
 function saveO(){localStorage.setItem('snb_orders',JSON.stringify(orders));}
@@ -2815,9 +2823,6 @@ function updateUser(){
     if (dashBalEl) dashBalEl.textContent = currentUser.balance;
 }
 
-/**
- * ✅ Toast notification system
- */
 function toast(msg, type = 'info') {
     const el = document.getElementById('toastEl');
     if (!el) return;
@@ -2843,16 +2848,12 @@ function toast(msg, type = 'info') {
     }, 2800);
 }
 
-// ==========================================
-// CONSOLE LOG FOR DEBUGGING ✅ HELPFUL INFO
-// ==========================================
-console.log('%c🚀 Sheba Net BD - Fixed Version Loaded!', 'color: #00897b; font-size: 16px; font-weight: bold;');
-console.log('%c✅ All bugs fixed:', 'color: #00b894; font-size: 14px;');
-console.log('   • Infinite loop removed from updateAdminStats()');
-console.log('   • Firebase listeners optimized with cleanup');
-console.log('   • Error handling improved throughout');
-console.log('   • Memory leaks prevented');
-console.log('%c🔧 If you see any errors, please share the console log!', 'color: #fdcb6e; font-size: 12px;');
+console.log('%c🚀 Sheba Net BD - Version 2.0 With WhatsApp Features!', 'color: #00897b; font-size: 16px; font-weight: bold;');
+console.log('%c✅ New Features:', 'color: #25d366; font-size: 14px;');
+console.log('   • WhatsApp Support Number (Editable)');
+console.log('   • WhatsApp Group Link (Editable)');
+console.log('   • Dynamic WhatsApp Float Button');
+console.log('   • WA Integration in User Dashboard');
 </script>
 </body>
 </html>
