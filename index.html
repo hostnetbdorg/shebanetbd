@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ভূমি সেবা - অনলাইন ড্যাশবোর্ড</title>
+    
+    <!-- Font Awesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #2ecc71;
+            --primary-green-dark: #27ae60;
+            --bg-light: #f0f9f4;
+            --bg-white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-gray: #7f8c8d;
+            --text-light: #95a5a6;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== MODAL STYLES ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+            color: white;
+            padding: 24px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group label i {
+            color: var(--primary-green);
+            margin-right: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Noto Sans Bengali', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+            color: var(--text-gray);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            color: #1565c0;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        .bkash-info {
+            background: linear-gradient(135deg, #e2136e, #b0105a);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .bkash-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .bkash-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .min-amount {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            margin-top: 10px;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-light);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-white);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--text-gray);
+            cursor: pointer;
+            padding: 8px;
+            transition: color 0.3s;
+        }
+
+        .icon-btn:hover {
+            color: var(--primary-green);
+        }
+
+        .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.65rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-auth {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Noto Sans Bengali', sans-serif;
+            border: none;
+        }
+
+        .btn-login {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-green-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-register {
+            background: transparent;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+        }
+
+        .btn-register:hover {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 65px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-white);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            position: fixed;
+            left: -100%;
+            top: 65px;
+            height: calc(100vh - 65px);
+            transition: left 0.3s ease;
+            z-index: 999;
+            box-shadow: var(--shadow-hover);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Menu Items */
+        .menu-section {
+            padding: 15px 0;
+        }
+
+        .section-label {
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            gap: 14px;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-light);
+            border-left-color: var(--primary-green);
+            color: var(--primary-green-dark);
+        }
+
+        .menu-item.active {
+            background: var(--bg-light);
+            border-left-color: var(--primary-green);
+            color: var(--primary-green-dark);
+            font-weight: 600;
+        }
+
+        .menu-item i {
+            width: 24px;
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--text-gray);
+        }
+
+        .menu-item:hover i,
+        .menu-item.active i {
+            color: var(--primary-green);
+        }
+
+        .menu-text {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .menu-item.home-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+            color: white;
+            margin: 10px 15px;
+            border-radius: 10px;
+            padding: 16px 20px;
+            border-left: none;
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+        }
+
+        .menu-item.home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(46, 204, 113, 0.4);
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+            color: white;
+        }
+
+        .menu-item.home-btn i {
+            color: white;
+            font-size: 1.4rem;
+        }
+
+        .lightning-badge {
+            background: #f39c12;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        .edit-badge {
+            color: #3498db;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Content Cards */
+        .content-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary-green);
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(46, 204, 113, 0.3);
+        }
+
+        .balance-label {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .recharge-btn {
+            background: white;
+            color: var(--primary-green);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recharge-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Quick Actions Grid */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .action-card {
+            background: var(--bg-white);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-card:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .action-card i {
+            font-size: 2rem;
+            color: var(--primary-green);
+            margin-bottom: 10px;
+        }
+
+        .action-card span {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: block;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Desktop Styles */
+        @media (min-width: 769px) {
+            .menu-toggle {
+                display: none;
+            }
+
+            .sidebar {
+                left: 0;
+                position: relative;
+                top: 0;
+                height: calc(100vh - 65px);
+                box-shadow: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .overlay {
+                display: none !important;
+            }
+        }
+
+        /* Service Grid for Desktop */
+        @media (min-width: 769px) {
+            .main-container {
+                display: flex;
+            }
+
+            .sidebar {
+                width: 300px;
+                flex-shrink: 0;
+            }
+
+            .main-content {
+                flex: 1;
+                min-width: 0;
+            }
+        }
+
+        /* Scrollbar Styling */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg-light);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary-green);
+            border-radius: 3px;
+        }
+
+        /* Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .menu-item {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        .menu-item:nth-child(1) { animation-delay: 0.05s; }
+        .menu-item:nth-child(2) { animation-delay: 0.1s; }
+        .menu-item:nth-child(3) { animation-delay: 0.15s; }
+        .menu-item:nth-child(4) { animation-delay: 0.2s; }
+        .menu-item:nth-child(5) { animation-delay: 0.25s; }
+        .menu-item:nth-child(6) { animation-delay: 0.3s; }
+        .menu-item:nth-child(7) { animation-delay: 0.35s; }
+        .menu-item:nth-child(8) { animation-delay: 0.4s; }
+        .menu-item:nth-child(9) { animation-delay: 0.45s; }
+        .menu-item:nth-child(10) { animation-delay: 0.5s; }
+
+        /* Hidden class for logged out state */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Login prompt card */
+        .login-prompt {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .login-prompt i {
+            font-size: 4rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        .login-prompt h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+
+        .login-prompt p {
+            color: var(--text-gray);
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-section">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo-icon">
+                <i class="fas fa-landmark"></i>
+            </div>
+            <span class="logo-text">ভূমি সেবা</span>
+        </div>
+        
+        <div class="header-icons" id="headerAuth">
+            <!-- Will be populated by JavaScript based on login state -->
+        </div>
+    </header>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- LOGIN/REGISTER MODAL -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-circle"></i> <span id="authModalTitle">লগইন</span></h2>
+                <button class="modal-close" onclick="closeModal('authModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Tabs -->
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="switchAuthTab('login')">লগইন</button>
+                    <button class="tab-btn" onclick="switchAuthTab('register')">রেজিস্ট্রেশন</button>
+                </div>
+
+                <!-- Login Tab -->
+                <div class="tab-content active" id="loginTab">
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label><i class="fas fa-mobile-alt"></i> মোবাইল নম্বর</label>
+                            <input type="tel" class="form-control" placeholder="01XXXXXXXXX" required pattern="01[0-9]{9}">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-lock"></i> পাসওয়ার্ড</label>
+                            <input type="password" class="form-control" placeholder="আপনার পাসওয়ার্ড" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> লগইন করুন
+                        </button>
+                    </form>
+                    <div class="divider">অথবা</div>
+                    <button class="btn-secondary" onclick="switchAuthTab('register')">
+                        <i class="fas fa-user-plus"></i> নতুন অ্যাকাউন্ট তৈরি করুন
+                    </button>
+                </div>
+
+                <!-- Register Tab -->
+                <div class="tab-content" id="registerTab">
+                    <form id="registerForm" onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> পুরো নাম</label>
+                            <input type="text" class="form-control" placeholder="আপনার নাম" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-mobile-alt"></i> মোবাইল নম্বর</label>
+                            <input type="tel" class="form-control" placeholder="01XXXXXXXXX" required pattern="01[0-9]{9}" id="regPhone">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-id-card"></i> NID নম্বর</label>
+                            <input type="text" class="form-control" placeholder="১০ ডিজিটের NID" required pattern="[0-9]{10}">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> ইমেইল</label>
+                            <input type="email" class="form-control" placeholder="example@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-lock"></i> পাসওয়ার্ড</label>
+                            <input type="password" class="form-control" placeholder="কমপক্ষে ৬ অক্ষর" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-lock"></i> পাসওয়ার্ড নিশ্চিত করুন</label>
+                            <input type="password" class="form-control" placeholder="পাসওয়ার্ড আবার লিখুন" required>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-user-plus"></i> অ্যাকাউন্ট তৈরি করুন
+                        </button>
+                    </form>
+                    <div class="divider">অথবা</div>
+                    <button class="btn-secondary" onclick="switchAuthTab('login')">
+                        <i class="fas fa-sign-in-alt"></i> ইতিমধ্যে অ্যাকাউন্ট আছে? লগইন করুন
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECHARGE MODAL -->
+    <div class="modal-overlay" id="rechargeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-wallet"></i> রিচার্জ করুন</h2>
+                <button class="modal-close" onclick="closeModal('rechargeModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- bKash Info -->
+                <div class="bkash-info">
+                    <h3><i class="fas fa-mobile-alt"></i> bKash পেমেন্ট</h3>
+                    <p>নিচের নম্বরে টাকা পাঠান</p>
+                    <div class="bkash-number">01611331466</div>
+                    <div class="min-amount">
+                        <i class="fas fa-info-circle"></i> সর্বনিম্ন রিচার্জ: <strong>৳২০০</strong>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>নির্দেশনা:</strong><br>
+                        ১. bKash অ্যাপ থেকে <strong>01611331466</strong> নম্বে টাকা Send Money করুন<br>
+                        ২. ট্রাঞ্জেকশন ID নিচের ফর্মে দিন<br>
+                        ৩. সাবমিট করুন, ৫ মিনিটের মধ্যে ব্যালেন্ট আপডেট হবে
+                    </div>
+                </div>
+
+                <form id="rechargeForm" onsubmit="handleRecharge(event)">
+                    <div class="form-group">
+                        <label><i class="fas fa-mobile-alt"></i> আপনার bKash নম্বর (যে নম্বর থেকে পাঠাবেন)</label>
+                        <input type="tel" class="form-control" placeholder="01XXXXXXXXX" required pattern="01[0-9]{9}" id="rechargeFromNumber">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-receipt"></i> ট্রাঞ্জেকশন ID (TrxID)</label>
+                        <input type="text" class="form-control" placeholder="উদাহরণ: 8ABC123DE" required id="transactionId">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-money-bill-wave"></i> পাঠানো টাকার পরিমাণ (টাকা)</label>
+                        <input type="number" class="form-control" placeholder="সর্বনিম্ন ৳২০০" required min="200" id="rechargeAmount">
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i> রিচার্জ সাবমিট করুন
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SERVICE REQUIRED RECHARGE MODAL -->
+    <div class="modal-overlay" id="serviceRechargeModal">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                <h2><i class="fas fa-exclamation-triangle"></i> রিচার্জ প্রয়োজন!</h2>
+                <button class="modal-close" onclick="closeModal('serviceRechargeModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-wallet"></i>
+                    <div>
+                        <strong>এই সেবাটি ব্যবহার করতে আপনার অ্যাকাউন্টে কমপক্ষে <strong>৳২০০</strong> ব্যালেন্স প্রয়োজন।></strong><br><br>
+                        আপনার বর্তমান ব্যালেন্স: <strong>৳<span id="currentBalanceDisplay">0</span></strong>
+                    </div>
+                </div>
+
+                <p style="text-align: center; margin: 20px 0; color: var(--text-gray);">
+                    অনুগ্রহ করে রিচার্জ করুন অথবা অন্য সেবা বেছে নিন।
+                </p>
+
+                <button class="btn-primary" onclick="closeModal('serviceRechargeModal'); openModal('rechargeModal');">
+                    <i class="fas fa-plus-circle"></i> এখনই রিচার্জ করুন
+                </button>
+                <button class="btn-secondary" onclick="closeModal('serviceRechargeModal')" style="margin-top: 10px;">
+                    <i class="fas fa-arrow-left"></i> ফিরে যান
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
+                <h2><i class="fas fa-check-circle"></i> <span id="successTitle">সফল!</span></h2>
+                <button class="modal-close" onclick="closeModal('successModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--primary-green); margin-bottom: 20px;"></i>
+                    <p id="successMessage" style="font-size: 1.1rem; line-height: 1.8; color: var(--text-gray);"></p>
+                    <button class="btn-primary" onclick="closeModal('successModal')" style="margin-top: 20px;">
+                        <i class="fas fa-thumbs-up"></i> ঠিক আছে
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-tachometer-alt"></i>
+                    অনলাইন ড্যাশবোর্ড
+                </h1>
+            </div>
+
+            <nav class="menu-section">
+                <!-- Home Button -->
+                <a href="#" class="menu-item home-btn active" onclick="showHome()">
+                    <i class="fas fa-home"></i>
+                    <span class="menu-text">সার্ভিস লিস্ট</span>
+                </a>
+
+                <!-- Recharge/Bkash -->
+                <a href="#" class="menu-item" onclick="openModal('rechargeModal')">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span class="menu-text">বিকাশ</span>
+                </a>
+
+                <!-- Section: Important Services -->
+                <div class="section-label">গুরুত্ব</div>
+
+                <!-- Services that require login and balance check -->
+                <a href="#" class="menu-item service-link" data-service="খাজনা অনুমোদন">
+                    <i class="fas fa-id-card"></i>
+                    <span class="menu-text">খাজনা অনুমোদন</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="খাজনা পেমেন্ট লিংক">
+                    <i class="fas fa-credit-card"></i>
+                    <span class="menu-text">খাজনা পেমেন্ট লিংক</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="ওয়ার্কিং খতিয়ান">
+                    <i class="fas fa-file-contract"></i>
+                    <span class="menu-text">ওয়ার্কিং খতিয়ান</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="মৌজা ভিত্তিক খতিয়ান বই">
+                    <i class="fas fa-server"></i>
+                    <span class="menu-text">মৌজা ভিত্তিক খতিয়ান বই</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="খাজনা কমানো">
+                    <i class="fas fa-database"></i>
+                    <span class="menu-text">খাজনা কমানো</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="অনলাইন খতিয়ান ডাটা এনট্রি">
+                    <i class="fas fa-briefcase"></i>
+                    <span class="menu-text">অনলাইন খতিয়ান ডাটা এনট্রি</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="পুরাতন দাখিলা">
+                    <i class="fas fa-edit"></i>
+                    <span class="menu-text">পুরাতন দাখিলা</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="land.gov.bd পাসওয়ার্ড রিসেট">
+                    <i class="fas fa-key"></i>
+                    <span class="menu-text">land.gov.bd পাসওয়ার্ড রিসেট</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="এনআইডি নাম্বার দিয়ে একাউন্ট রিকভারি">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span class="menu-text">এনআইডি নাম্বার দিয়ে একাউন্ট রিকভারি</span>
+                    <span class="lightning-badge"><i class="fas fa-bolt"></i></span>
+                </a>
+
+                <!-- Section: Other Services -->
+                <div class="section-label">অন্যান্য সেবা</div>
+
+                <a href="#" class="menu-item service-link" data-service="এনআইডি অনুযায়ী একাউন্ট আপডেট">
+                    <i class="fas fa-edit"></i>
+                    <span class="menu-text">এনআইডি অনুযায়ী একাউন্ট আপডেট</span>
+                    <span class="edit-badge"><i class="fas fa-pen"></i></span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="হোল্ডিং অনুমোদন">
+                    <i class="fas fa-check-circle"></i>
+                    <span class="menu-text">হোল্ডিং অনুমোদন</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="দলিল তল্লাশি">
+                    <i class="fas fa-search"></i>
+                    <span class="menu-text">দলিল তল্লাশি</span>
+                </a>
+
+                <a href="#" class="menu-item service-link" data-service="মৌজা ম্যাপ">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span class="menu-text">মৌজা ম্যাপ</span>
+                </a>
+
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="mainContent">
+            
+            <!-- Default View: Login Prompt (when not logged in) -->
+            <div id="loginPrompt" class="content-card">
+                <div class="login-prompt">
+                    <i class="fas fa-user-circle"></i>
+                    <h3>ভূমি সেবায় স্বাগতম!</h3>
+                    <p>আমাদের সেবা ব্যবহার করতে অনুগ্রহ করে লগইন অথবা রেজিস্ট্রেশন করুন।</p>
+                    <button class="btn-primary" onclick="openModal('authModal')" style="width: auto; padding: 14px 40px;">
+                        <i class="fas fa-sign-in-alt"></i> লগইন / রেজিস্ট্রেশন
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logged In View (hidden by default) -->
+            <div id="loggedInContent" class="hidden">
+                
+                <!-- Balance Card -->
+                <div class="balance-card">
+                    <div class="balance-label">
+                        <i class="fas fa-wallet"></i>
+                        বর্তমান ব্যালেন্স
+                    </div>
+                    <div class="balance-amount" id="balanceAmount">৳০.০০</div>
+                    <button class="recharge-btn" onclick="openModal('rechargeModal')">
+                        <i class="fas fa-plus-circle"></i>
+                        রিচার্জ করুন
+                    </button>
+                </div>
+
+                <!-- User Profile Card -->
+                <div class="content-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-user-circle"></i>
+                        আমার প্রোফাইল
+                    </h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;" id="profileDetails">
+                        <!-- Will be populated after login -->
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="content-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-bolt"></i>
+                        দ্রুত অ্যাকশন
+                    </h2>
+                    <div class="quick-actions">
+                        <div class="action-card" onclick="openModal('rechargeModal')">
+                            <i class="fas fa-wallet"></i>
+                            <span>রিচার্জ</span>
+                        </div>
+                        <div class="action-card">
+                            <i class="fas fa-user-edit"></i>
+                            <span>প্রোফাইল</span>
+                        </div>
+                        <div class="action-card">
+                            <i class="fas fa-history"></i>
+                            <span>হিস্ট্রি</span>
+                        </div>
+                        <div class="action-card">
+                            <i class="fas fa-headset"></i>
+                            <span>সাপোর্ট</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Welcome Message -->
+                <div class="content-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        স্বাগতম, <span id="welcomeUserName">ব্যবহারকারী</span>!
+                    </h2>
+                    <p style="color: var(--text-gray); line-height: 1.8;">
+                        ভূমি সেবা ডিজিটাল প্ল্যাটফর্মে আপনাকে স্বাগতম! বাম পাশের মেনু থেকে আপনার প্রয়োজনীয় সেবা নির্বাচন করুন। 
+                        সকল সেবা অনলাইনে পাওয়া যাচ্ছে ২৪/৷।
+                    </p>
+                    <div style="margin-top: 20px; padding: 16px; background: #d4edda; border-radius: 8px; border-left: 4px solid #28a745;">
+                        <strong><i class="fas fa-check-circle" style="color: #28a745;"></i> অ্যাকাউন্ট স্ট্যাটাস:</strong> 
+                        <span style="color: var(--text-gray); font-size: 0.95rem;">সক্রিয় | ব্যালেন্স: <strong id="welcomeBalance">৳০.০০</strong></span>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ============ STATE MANAGEMENT ============
+        let appState = {
+            isLoggedIn: false,
+            user: null,
+            balance: 0,
+            selectedService: null
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const savedState = localStorage.getItem('bhumiseba_state');
+            if (savedState) {
+                appState = JSON.parse(savedState);
+                updateUI();
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('bhumiseba_state', JSON.stringify(appState));
+        }
+
+        // ============ UI UPDATE FUNCTIONS ============
+        function updateUI() {
+            const headerAuth = document.getElementById('headerAuth');
+            const loginPrompt = document.getElementById('loginPrompt');
+            const loggedInContent = document.getElementById('loggedInContent');
+
+            if (appState.isLoggedIn && appState.user) {
+                // Show logged in UI
+                headerAuth.innerHTML = `
+                    <button class="icon-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
+                    <div class="user-avatar" onclick="handleLogout()" title="লগআউট">
+                        ${appState.user.name ? appState.user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                `;
+                loginPrompt.classList.add('hidden');
+                loggedInContent.classList.remove('hidden');
+
+                // Update profile details
+                document.getElementById('profileDetails').innerHTML = `
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-gray); display: block; margin-bottom: 4px;">নাম</label>
+                        <div style="font-weight: 600; font-size: 1.05rem;">${appState.user.name || 'N/A'}</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-gray); display: block; margin-bottom: 4px;">ফোন</label>
+                        <div style="font-weight: 600; font-size: 1.05rem;">${appState.user.phone || 'N/A'}</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-gray); display: block; margin-bottom: 4px;">NID</label>
+                        <div style="font-weight: 600; font-size: 1.05rem;">${appState.user.nid || 'N/A'}</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-gray); display: block; margin-bottom: 4px;">ইমেইল</label>
+                        <div style="font-weight: 600; font-size: 1.05rem;">${appState.user.email || 'N/A'}</div>
+                    </div>
+                `;
+
+                // Update balance displays
+                const balanceText = `৳${appState.balance.toFixed(2)}`;
+                document.getElementById('balanceAmount').textContent = balanceText;
+                document.getElementById('welcomeBalance').textContent = balanceText;
+                document.getElementById('welcomeUserName').textContent = appState.user.name || 'ব্যবহারকারী';
+
+            } else {
+                // Show logged out UI
+                headerAuth.innerHTML = `
+                    <div class="auth-buttons">
+                        <button class="btn-auth btn-login" onclick="openModal('authModal')">লগইন</button>
+                        <button class="btn-auth btn-register" onclick="openModal('authModal'); switchAuthTab('register')">রেজিস্ট্রেশন</button>
+                    </div>
+                `;
+                loginPrompt.classList.remove('hidden');
+                loggedInContent.classList.add('hidden');
+            }
+        }
+
+        // ============ AUTH FUNCTIONS ============
+        function switchAuthTab(tab) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+            const title = document.getElementById('authModalTitle');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+
+            if (tab === 'login') {
+                tabs[0].classList.add('active');
+                document.getElementById('loginTab').classList.add('active');
+                title.textContent = 'লগইন';
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('registerTab').classList.add('active');
+                title.textContent = 'রেজিস্ট্রেশন';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Simulate login (in real app, this would be an API call)
+            appState.isLoggedIn = true;
+            appState.user = {
+                phone: formData.get('mobile') || e.target.querySelector('input[type="tel"]').value,
+                name: 'ডেমো ব্যবহারকারী',
+                nid: 'XXXXXXXXXX',
+                email: 'demo@email.com'
+            };
+            appState.balance = 0;
+
+            saveState();
+            updateUI();
+            closeModal('authModal');
+            showSuccess('লগইন সফল!', 'আপনি সফলভাবে লগইন করেছেন। এখন আপনি সকল সেবা ব্যবহার করতে পারবেন।');
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            // Simulate registration
+            appState.isLoggedIn = true;
+            appState.user = {
+                name: form.querySelector('input[type="text"]').value,
+                phone: form.querySelector('#regPhone').value,
+                nid: form.querySelectorAll('input[type="text"]')[1].value,
+                email: form.querySelector('input[type="email"]').value
+            };
+            appState.balance = 0;
+
+            saveState();
+            updateUI();
+            closeModal('authModal');
+            showSuccess('রেজিস্ট্রেশন সফল!', 'আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। অনুগ্রহ করে রিচার্জ করে সেবা ব্যবহার করুন।');
+        }
+
+        function handleLogout() {
+            if (confirm('আপনি কি লগআউট করতে চান?')) {
+                appState.isLoggedIn = false;
+                appState.user = null;
+                appState.balance = 0;
+                saveState();
+                updateUI();
+            }
+        }
+
+        // ============ RECHARGE FUNCTIONS ============
+        function handleRecharge(e) {
+            e.preventDefault();
+            const fromNumber = document.getElementById('rechargeFromNumber').value;
+            const transactionId = document.getElementById('transactionId').value;
+            const amount = parseFloat(document.getElementById('rechargeAmount').value);
+
+            // Validate minimum amount
+            if (amount < 200) {
+                alert('সর্বনিম্ন ৳২০০ রিচার্জ করতে হবে!');
+                return;
+            }
+
+            // Simulate recharge processing
+            appState.balance += amount;
+            saveState();
+            updateUI();
+
+            closeModal('rechargeModal');
+            e.target.reset();
+
+            showSuccess('রিচার্জ সফল!', `আপনার অ্যাকাউন্টে ৳${amount.toFixed(2)} যোগ হয়েছে।\n\nট্রাঞ্জেকশন ID: ${transactionId}\nনতুন ব্যালেন্স: ৳${appState.balance.toFixed(2)}`);
+        }
+
+        // ============ SERVICE CLICK HANDLER ============
+        document.querySelectorAll('.service-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Check if user is logged in
+                if (!appState.isLoggedIn) {
+                    openModal('authModal');
+                    return;
+                }
+
+                // Check balance (minimum 200)
+                if (appState.balance < 200) {
+                    document.getElementById('currentBalanceDisplay').textContent = appState.balance.toFixed(2);
+                    appState.selectedService = this.dataset.service;
+                    openModal('serviceRechargeModal');
+                    return;
+                }
+
+                // If logged in and has balance, proceed to service
+                const serviceName = this.dataset.service;
+                showSuccess('সেবা নির্বাচিত!', `"${serviceName}" সেবাটি নির্বাচন করা হয়েছে। এই ফিচারটি শীঘ্রই উপলব্ধ হবে।`);
+            });
+        });
+
+        // ============ MODAL FUNCTIONS ============
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function showSuccess(title, message) {
+            document.getElementById('successTitle').textContent = title;
+            document.getElementById('successMessage').textContent = message;
+            openModal('successModal');
+        }
+
+        // ============ SIDEBAR TOGGLE ============
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function showHome() {
+            // Just close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+
+        // Close sidebar when clicking menu items on mobile
+        document.querySelectorAll('.menu-item:not(.service-link)').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        });
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Initialize
+        loadState();
+    </script>
+
+</body>
+</html>
